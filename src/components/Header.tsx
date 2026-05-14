@@ -3,13 +3,17 @@ interface HeaderProps {
   onToggleForm: () => void;
 };
 
-export function Header({ showForm, onToggleForm }: HeaderProps) {
+export default function Header(
+  { showForm, onToggleForm }: HeaderProps
+) {
   return (
-    <header>
-      <h1>Today I Learned</h1>
-      <button onClick={onToggleForm}>
-        { showForm ? 'Fechar' : 'Compartilhe um fato' }
-      </button>
-    </header>
+    <>
+      <header>
+        <h1>hoje eu aprendi</h1>
+        <button onClick={onToggleForm}>
+          { showForm ? 'fechar' : 'compartilhar um fato' }
+        </button>
+      </header>
+    </>
   );
 };
