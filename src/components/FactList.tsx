@@ -12,9 +12,11 @@ export default function FactList({ facts }: FactListProps) {
 
   return (
     <>
-      { facts.map(fact => {
-        return <FactItem key={fact.id} fact={fact} />
-      }) }
+      <ul>
+        {facts.map(fact => {
+          return <FactItem key={fact.id} fact={fact} />
+        })}
+      </ul>
     </>
   );
 };
