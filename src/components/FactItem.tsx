@@ -9,7 +9,7 @@ export default function FactItem({ fact }: FactItemProps) {
     <>
       <li>
         <p>{ fact.text }</p>
-        <a href={ fact.source }></a>
+        <a href={ fact.source } target="_blank" >Fonte</a>
         <span>{ fact.category }</span>
       </li>
     </>
