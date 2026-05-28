@@ -1,4 +1,4 @@
-import type { Fact } from '../types';
+import type { Fact } from "../types";
 
 interface FactItemProps {
   fact: Fact;
@@ -9,7 +9,7 @@ export default function FactItem({ fact }: FactItemProps) {
     <>
       <li>
         <p>{ fact.text }</p>
-        <a href={ fact.source } target="_blank" >Fonte</a>
+        <a href={ fact.source } target="_blank">Fonte</a>
         <span>{ fact.category }</span>
       </li>
     </>
