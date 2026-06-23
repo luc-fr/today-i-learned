@@ -2,20 +2,24 @@ import type { RefObject } from 'react';
 import { useState } from 'react';
 import { factSchema } from '../schemas';
 import { CATEGORIES } from '../constants';
+import { supabase } from '../supabaseClient';
 
 interface NewFactFormProps {
   inputRef: RefObject<HTMLInputElement | null>;
+  onAddFact: () => Promise<void>;
 };
 
-export default function NewFactForm({ inputRef }: NewFactFormProps) {
+export default function NewFactForm({ inputRef, onAddFact }: NewFactFormProps) {
   const [text, setText] = useState<string>('');
   const [source, setSource] = useState<string>('');
   const [category, setCategory] = useState<string>('');
   const [errors, setErrors] = useState<Record<string, string[]>>({});
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
   const char = 200 - text.length;
 
-  function handleSubmit(event: React.SubmitEvent<HTMLFormElement>) {
+  async function handleSubmit(event: React.SubmitEvent<HTMLFormElement>) {
     event.preventDefault();
 
     const result = factSchema.safeParse({
@@ -30,7 +34,29 @@ export default function NewFactForm({ inputRef }: NewFactFormProps) {
     };
 
     setErrors({});
-    console.log(result.data);
+    setSubmitError(null);
+    setIsSubmitting(true);
+
+    try {
+      const { error } = await supabase
+        .from('facts')
+        .insert([{
+          text,
+          source,
+          category
+        }])
+        .select();
+
+        if (error) return setSubmitError('Não foi possível compartilhar um fato. Tente novamente.');
+
+        setText('');
+        setSource('');
+        setCategory('');
+
+        await onAddFact();
+    } finally {
+      setIsSubmitting(false)
+    }
   };
 
   return (
@@ -48,7 +74,8 @@ export default function NewFactForm({ inputRef }: NewFactFormProps) {
               value={text}
               onChange={event => setText(event.target.value)}
               maxLength={200}
-              className="w-full h-[53.6px] bg-stone-500 rounded-full p-4 border-none text-[18px]"
+              disabled={isSubmitting}
+              className="w-full h-[53.6px] bg-stone-500 rounded-full p-4 border-none text-[18px] disabled:opacity-50"
             />
             <span>{char}</span>
           </div>
@@ -60,7 +87,8 @@ export default function NewFactForm({ inputRef }: NewFactFormProps) {
             placeholder='Fonte confiável'
             value={source}
             onChange={event => setSource(event.target.value)}
-            className="w-full h-[53.6px] bg-stone-500 rounded-full p-4 border-none text-[18px]"
+            disabled={isSubmitting}
+            className="w-full h-[53.6px] bg-stone-500 rounded-full p-4 border-none text-[18px] disabled:opacity-50"
           />
           {errors.source?.[0] && <span className="text-red-500 text-[14px]">{errors.source[0]}</span>}
         </div>
@@ -68,7 +96,8 @@ export default function NewFactForm({ inputRef }: NewFactFormProps) {
           <select
             value={category}
             onChange={event => setCategory(event.target.value)}
-            className="h-[53.6px] bg-stone-500 rounded-full p-4 border-none text-[18px] capitalize"
+            disabled={isSubmitting}
+            className="h-[53.6px] bg-stone-500 rounded-full p-4 border-none text-[18px] capitalize disabled:opacity-50"
           >
             <option value=''>Escolha a categoria:</option>
             {CATEGORIES.map(category => (
@@ -85,9 +114,11 @@ export default function NewFactForm({ inputRef }: NewFactFormProps) {
         </div>
         <button
           type='submit'
-          className="h-14.25 bg-linear-[135deg,#3b82f6,#ef4444,#16a34a,#eab308] text-[20px] pt-5 px-8 pb-4.25 btn"
-        >compartilhar</button>
+          disabled={isSubmitting}
+          className="h-14.25 bg-linear-[135deg,#3b82f6,#ef4444,#16a34a,#eab308] text-[20px] pt-5 px-8 pb-4.25 btn disabled:opacity-50 disabled:scale-100 disabled:rotate-0"
+        >{isSubmitting ? 'enviando...' : 'compartilhar'}</button>
       </form>
+      {submitError && <p className="text-red-500 text-[14px] mb-4">{submitError}</p>}
     </>
   );
 };

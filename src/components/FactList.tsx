@@ -5,12 +5,14 @@ interface FactListProps {
   facts: Fact[];
   isLoading: boolean;
   error: string | null;
+  onVote: () => Promise<void>;
 };
 
 export default function FactList({
   facts,
   isLoading,
-  error
+  error,
+  onVote
 }: FactListProps) {
   if (isLoading) {
     return <p className="text-[32px] font-semibold flex-1">Caregando fatos...</p>;
@@ -28,7 +30,11 @@ export default function FactList({
     <>
       <ul className="flex flex-col flex-1 gap-4">
         { facts.map(fact => {
-          return <FactItem key={fact.id} fact={fact} />
+          return <FactItem
+            key={fact.id}
+            fact={fact}
+            onVote={onVote}
+          />
         }) }
       </ul>
     </>
